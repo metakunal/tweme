@@ -1,14 +1,14 @@
 # Tweme - GIF Reaction Suggester
 
-An app that generates perfect GIF reactions to any tweet using AI and GIPHY.
+Generate context-aware GIF reactions for tweets using an AI text-generation service and GIPHY.
 
 ## How It Works
 
-1. **Paste a tweet** into the textarea
-2. **Backend calls Gemini API** to generate 3 contextual GIF search keywords
-3. **Backend searches GIPHY** for GIFs matching each keyword
-4. **Frontend displays** the top 5 GIF reactions in an interactive grid
-5. **Click any GIF** to view it or copy the link
+1. **Paste a tweet** into the textarea.
+2. **Backend calls a GROQ / OpenAI-compatible text API** (see `backend/services/gemini.service.js`) to generate 3 contextual GIF search keywords.
+3. **Backend searches GIPHY** for GIFs matching each keyword.
+4. **Frontend displays** the top GIF reactions in an interactive grid.
+5. **Click any GIF** to view it or copy the link.
 
 ## Project Structure
 
@@ -16,8 +16,8 @@ An app that generates perfect GIF reactions to any tweet using AI and GIPHY.
 tweme/
 ├── backend/
 │   ├── services/
-│   │   ├── gemini.service.js    # Gemini API integration
-│   │   └── gif.service.js       # GIPHY API integration
+│   │   ├── gemini.service.js    # GROQ/OpenAI-compatible text generation (env: GROQ_API_KEY)
+│   │   └── gif.service.js       # GIPHY API integration (env: GIPHY_API_KEY)
 │   ├── controllers/
 │   │   └── gif.controller.js    # GIF generation logic
 │   ├── routes/
@@ -40,7 +40,7 @@ tweme/
 │   └── package.json
 │
 ├── .gitignore
-├── package.json                 # Root workspace
+├── package.json                 # Root workspace (uses npm workspaces + concurrently)
 └── README.md
 ```
 
@@ -54,14 +54,13 @@ npm install
 
 ### 2. Get API Keys
 
-**Gemini API:**
-- Go to [Google AI Studio](https://aistudio.google.com/apikey)
-- Create a new API key
-- Add to `backend/.env`: `GEMINI_API_KEY=your_key_here`
+**GROQ / OpenAI-compatible Text API (used by `gemini.service.js`):**
+- Provision an API key from your provider that is compatible with the OpenAI-style chat/completions API (the code calls a GROQ-compatible endpoint by default).
+- Add to `backend/.env`: `GROQ_API_KEY=your_key_here`
+- Optional: Override the API URL with `GROQ_API_URL=https://your-provider.example/v1/chat/completions` if you need a custom endpoint.
 
 **GIPHY API:**
-- Go to [GIPHY Developers](https://developers.giphy.com/)
-- Create an app to get API key
+- Go to https://developers.giphy.com/ and create an app to get an API key.
 - Add to `backend/.env`: `GIPHY_API_KEY=your_key_here`
 
 ### 3. Environment Variables
@@ -70,17 +69,22 @@ npm install
 cp backend/.env.example backend/.env
 ```
 
-Then update with your API keys:
+Edit `backend/.env` with at least the following:
+
 ```env
 PORT=5000
 NODE_ENV=development
-GEMINI_API_KEY=your_gemini_key
+GROQ_API_KEY=your_groq_key
+# Optional: GROQ_API_URL to override the default endpoint
 GIPHY_API_KEY=your_giphy_key
 ```
 
+If `GROQ_API_KEY` is missing, the backend will fall back to a small set of safe keywords.
+
 ### 4. Development
 
-Run frontend and backend together:
+Run frontend and backend together from the repo root:
+
 ```bash
 npm run dev
 ```
@@ -107,24 +111,18 @@ npm run build
 
 ## Tech Stack
 
-**Frontend:**
-- React 18
-- Vite (lightning-fast bundler)
-- Tailwind CSS (styling)
-- Axios (API calls)
+**Frontend:** React, Vite, Tailwind CSS
 
-**Backend:**
-- Node.js
-- Express (server framework)
-- Gemini API (AI-powered keyword generation)
-- GIPHY API (GIF search)
-- dotenv (environment configuration)
+**Backend:** Node.js, Express, dotenv, node-fetch
+
+**APIs:** GROQ/OpenAI-compatible text generation (env: `GROQ_API_KEY`), GIPHY (env: `GIPHY_API_KEY`)
 
 ## API Endpoint
 
 ### `POST /api/generate-gif`
 
 **Request:**
+
 ```json
 {
   "tweet": "your tweet text here"
@@ -132,6 +130,7 @@ npm run build
 ```
 
 **Response:**
+
 ```json
 {
   "keywords": ["sad vibes", "internal screaming", "existential crisis"],
@@ -148,13 +147,11 @@ npm run build
 
 ## Features
 
-✅ **AI-Powered:** Gemini generates context-aware GIF keywords  
-✅ **GIF Search:** GIPHY integration for massive GIF library  
-✅ **Responsive Grid:** Mobile-friendly GIF display  
-✅ **Copy & Share:** Easy GIF link copying  
-✅ **Error Handling:** Graceful fallbacks if APIs fail  
-✅ **Loading States:** Visual feedback during processing  
-✅ **No Database:** Stateless API design
+- **AI-Powered:** Generates context-aware GIF keywords using a GROQ/OpenAI-compatible model.
+- **GIF Search:** GIPHY integration for a large GIF library.
+- **Responsive Grid:** Mobile-friendly GIF display.
+- **Copy & Share:** Easy GIF link copying.
+- **Graceful Fallbacks:** Uses fallback keywords when the text API is unavailable.
 
 ## Keyboard Shortcuts
 
@@ -162,9 +159,9 @@ npm run build
 
 ## Error Handling
 
-- If Gemini API fails, falls back to generic keywords
-- If GIPHY returns no results, shows error message
-- CORS enabled for frontend-backend communication
+- If the text-generation API fails, the backend returns safe fallback keywords.
+- If GIPHY returns no results, the frontend shows an appropriate message.
+- CORS is enabled for frontend-backend communication.
 
 ## Next Steps
 
