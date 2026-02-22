@@ -24,7 +24,12 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api', gifRoutes);
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
+// Start server (only if not running as a Vercel serverless function)
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+  });
+}
+
+// Export for Vercel
+export default app;
