@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import './index.css'
 import GifGrid from './GifGrid.jsx'
+import Navbar from './Navbar.jsx'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
@@ -57,63 +58,94 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-3">Tweme</h1>
-          <p className="text-blue-100 text-lg">Find the perfect GIF reaction to any tweet</p>
-        </div>
+    <div className="min-h-screen bg-slate-900 text-slate-100 font-sans selection:bg-blue-500/30">
+      <Navbar />
+      
+      <div className="max-w-6xl mx-auto px-4 pb-12">
+        {/* Header Section */}
+        <header className="text-center mb-12">
+          <h1 className="text-6xl md:text-7xl font-extrabold mb-6 tracking-tight bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent drop-shadow-sm">
+            Tweme
+          </h1>
+          <p className="text-slate-400 text-xl max-w-2xl mx-auto font-medium">
+            AI-powered context-aware GIF reactions for your texts/tweets.
+          </p>
+        </header>
 
-        {/* Input Section */}
-        <div className="bg-white rounded-lg shadow-2xl p-6 md:p-8 mb-8">
-          <label className="block text-gray-700 font-semibold mb-3">
-            Paste a tweet:
-          </label>
+        {/* Input Card */}
+        <section className="bg-slate-800 border border-slate-700/50 rounded-2xl shadow-2xl p-6 md:p-10 mb-8 backdrop-blur-sm transition-all hover:border-blue-500/30">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-2 h-6 bg-blue-500 rounded-full"></div>
+            <label className="text-slate-200 font-bold text-lg uppercase tracking-wider">
+              Paste a tweet:
+            </label>
+          </div>
           <textarea
             value={tweet}
             onChange={(e) => setTweet(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Paste tweet text here..."
-            className="w-full border-2 border-gray-300 rounded-lg p-4 mb-4 focus:outline-none focus:border-blue-500 resize-none h-24"
+            placeholder="What's on your mind? Paste a tweet here..."
+            className="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-5 mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-slate-200 placeholder-slate-500 resize-none h-32 text-lg shadow-inner"
           />
           <button
             onClick={handleGenerate}
             disabled={loading || !tweet.trim()}
-            className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+            className="w-full group relative overflow-hidden bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 text-white font-bold py-4 px-8 rounded-xl transition-all shadow-lg hover:shadow-blue-500/20 active:scale-[0.98]"
           >
-            {loading ? 'Generating...' : 'Generate GIF Reactions'}
+            <span className="relative z-10 flex items-center justify-center gap-2">
+              {loading ? (
+                <>
+                  <div className="animate-spin w-5 h-5 border-2 border-white/30 border-t-white rounded-full"></div>
+                  Generating...
+                </>
+              ) : (
+                'Generate GIF Reactions'
+              )}
+            </span>
           </button>
-        </div>
+        </section>
 
-        {/* Keywords */}
+        {/* Keywords Chips */}
         {keywords.length > 0 && (
-          <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-            <p className="text-gray-700 font-semibold mb-3">Search keywords used:</p>
-            <div className="flex flex-wrap gap-2">
-              {keywords.map((keyword, idx) => (
-                <span
-                  key={idx}
-                  className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
-                >
-                  {keyword}
-                </span>
-              ))}
-            </div>
+          <div className="mb-8 flex flex-wrap items-center gap-3 bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+            <span className="text-slate-400 font-semibold text-sm uppercase tracking-widest mr-2">Keywords:</span>
+            {keywords.map((keyword, idx) => (
+              <span
+                key={idx}
+                className="bg-blue-500/10 border border-blue-500/20 text-blue-400 px-4 py-1.5 rounded-full text-sm font-medium hover:bg-blue-500/20 transition-colors cursor-default"
+              >
+                #{keyword}
+              </span>
+            ))}
           </div>
         )}
 
-        {/* Error Message */}
+        {/* Error State */}
         {error && (
-          <div className="bg-red-100 border-2 border-red-300 text-red-700 px-6 py-4 rounded-lg mb-8">
-            {error}
+          <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-6 py-5 rounded-xl mb-8 flex items-center gap-3 animate-pulse">
+            <svg className="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="font-semibold">{error}</span>
           </div>
         )}
 
-        {/* GIF Grid */}
+        {/* Main GIF Result Grid Container */}
         {gifs.length > 0 && (
-          <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
-            <p className="text-gray-700 font-semibold mb-4">Top 5 GIF Reactions:</p>
+          <div className="bg-slate-800/80 border border-slate-700 rounded-3xl shadow-3xl p-6 md:p-10 backdrop-blur-md">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                <span className="p-2 bg-blue-500/10 rounded-lg text-blue-400">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </span>
+                Top Reactions
+              </h2>
+              <span className="bg-slate-700 text-slate-300 text-xs px-3 py-1 rounded-lg font-bold uppercase tracking-tighter shadow-sm border border-slate-600">
+                5 results
+              </span>
+            </div>
             <GifGrid gifs={gifs} loading={false} />
           </div>
         )}
